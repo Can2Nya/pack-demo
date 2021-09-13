@@ -2,10 +2,12 @@ import { rollup } from "rollup";
 import babel from "@babel/core";
 import webpack from "webpack";
 import * as esbuild from "esbuild";
+import { babel as rollupBabel } from "@rollup/plugin-babel";
+import { build, createConfiguration } from "snowpack";
 
 import path from "path";
 import process from "process";
-import fs from 'fs/promises'
+import fs from "fs/promises";
 
 const filePath = path.join(process.cwd(), "src/rollup.js");
 // const cjsFilePath = path.join(process.cwd(), "src/angular.js");
@@ -23,6 +25,7 @@ async function buildRollup(fp) {
   // create a bundle
   const bundle = await rollup({
     input: fp,
+    plugins: [rollupBabel()],
   });
 
   // generate code and a sourcemap
@@ -56,6 +59,22 @@ function buildWebpack() {
         //   // 支持输出模块
         //   outputModule: true,
         // }
+        module: {
+          rules: [
+            {
+              test: /\.m?js$/,
+              exclude: /node_modules/,
+              use: {
+                loader: "babel-loader",
+                // options: {
+                //   presets: [
+                //     ['@babel/preset-env', { targets: "defaults" }]
+                //   ]
+                // }
+              },
+            },
+          ],
+        },
       },
       (err, stat) => {
         if (err) {
@@ -102,3 +121,16 @@ async function buildEsbuild() {
 }
 
 await buildEsbuild();
+// -------------snowpack
+
+const config = createConfiguration({
+  mode: "development",
+  mount: {
+    src: filePath,
+  },
+  packageOptions: {
+    external: ['path', 'fs', 'util', 'crypto', 'module', 'events'],
+  },
+  plugins: ['@snowpack/plugin-babel']
+});
+const { result } = await build({ config });

@@ -4,6 +4,7 @@ import { writeFile, readdirSync, mkdirSync, readFileSync, statSync, watch, lstat
 import crypto from 'crypto';
 import module$1 from 'module';
 import { EventEmitter } from 'events';
+import { rollup as fakeRollup } from "rollup";
 
 /*
 	Rollup.js v0.65.0
